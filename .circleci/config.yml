@@ -1,17 +1,5 @@
 version: 2.1
 jobs:
-  build_test:
-    docker:
-      - image: cimg/python:3.10.0
-    steps:
-      - checkout
-      - run:
-          name: Install dependencies
-          command: |
-            python3 -m venv venv
-            . venv/bin/activate
-            pip install -r etc/base.txt
-
   build_docker:
     docker:
       - image: cimg/python:3.10.0
@@ -29,14 +17,7 @@ jobs:
 workflows:
   build-workflow:
     jobs:
-      - build_test:
-          filters:
-            branches:
-              only:
-                - main
       - build_docker:
-          requires:
-            - build_test
           filters:
             branches:
               only:
