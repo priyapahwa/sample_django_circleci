@@ -25,7 +25,7 @@ jobs:
             docker build -t priyapahwa19/sample-django-circleci:latest .
             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
             docker push priyapahwa19/sample-django-circleci:latest
-
+# Workflows
 workflows:
   build-workflow:
     jobs:
