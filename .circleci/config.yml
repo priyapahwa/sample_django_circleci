@@ -1,32 +1,43 @@
-# This config was automatically generated from your source code
-# Stacks detected: deps:python:.,file:manage.py:.
 version: 2.1
-orbs:
-  python: circleci/python@2
 jobs:
-  test-python:
-    # Install dependencies and run tests
+  build_test:
     docker:
-      - image: cimg/python:3.8-node
+      - image: cimg/python:3.10.0
     steps:
       - checkout
-      - python/install-packages
       - run:
-          name: Run tests
-          command: python manage.py test
-  deploy:
-    # This is an example deploy job, not actually used by the workflow
+          name: Install dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r etc/base.txt
+
+  build_docker:
     docker:
-      - image: cimg/base:stable
+      - image: cimg/python:3.10.0
     steps:
-      # Replace this with steps to deploy to users
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: false
       - run:
-          name: deploy
-          command: '#e.g. ./deploy.sh'
+          name: Build Docker image
+          command: |
+            docker build -t priyapahwa19/sample-django-circleci:latest .
+            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+            docker push priyapahwa19/sample-django-circleci:latest
+
 workflows:
-  build-and-test:
+  build-workflow:
     jobs:
-      - test-python
-    # - deploy:
-    #     requires:
-    #       - test-python
+      - build_test:
+          filters:
+            branches:
+              only:
+                - main
+      - build_docker:
+          requires:
+            - build_test
+          filters:
+            branches:
+              only:
+                - main
